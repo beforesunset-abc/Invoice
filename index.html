@@ -2,129 +2,238 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>견적서 - 모바일 겸용 가로형</title>
+    <title>비포썬셋 견적서 양식</title>
     <style>
-        /* 기본 설정 및 A4 가로 인쇄 설정 */
-        @page { size: A4 landscape; margin: 10mm; }
-        body { font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; color: #333; background-color: #f0f0f0; }
-        
-        .container { 
-            width: 95%; /* 모바일 기본 너비 */
-            max-width: 277mm; /* PC 가로 최대 너비 */
-            margin: 10px auto; 
-            padding: 15px; 
-            background: #fff; 
-            box-sizing: border-box; 
-        }
-        
-        /* 헤더 섹션 */
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-        .logo { color: #d35400; font-weight: bold; font-size: 20px; line-height: 1.2; }
-        .title { font-size: 26px; text-decoration: underline; letter-spacing: 10px; flex-grow: 1; text-align: center; }
-
-        /* 정보 테이블 (모바일 대응) */
-        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
-        .info-table td { border: 1px solid #333; padding: 8px; font-size: 12px; }
-        .info-label { background-color: #f9f9f9; width: 70px; text-align: center; font-weight: bold; }
-
-        /* 메인 컨텐츠: PC에선 2단, 모바일에선 1단 */
-        .main-content { display: flex; flex-direction: column; gap: 20px; }
-        @media (min-width: 1024px) {
-            .main-content { flex-direction: row; } /* PC 화면에서만 가로 2단 */
-            .left-col { flex: 1.3; }
-            .right-col { flex: 1; }
+        /* A4 가로 인쇄 설정 */
+        @page { size: A4 landscape; margin: 0; }
+        body { 
+            font-family: 'Malgun Gothic', sans-serif; 
+            margin: 0; padding: 0; 
+            background-color: #fdf7f2; /* 샘플의 연한 베이지 배경색 */
         }
 
-        h3 { text-align: center; font-size: 16px; margin: 10px 0; background: #eee; padding: 5px; }
+        .paper {
+            width: 297mm;
+            height: 210mm;
+            padding: 15mm;
+            box-sizing: border-box;
+            background-color: #fdf7f2;
+            position: relative;
+        }
 
-        /* 테이블 스타일 */
-        table { width: 100%; border-collapse: collapse; border: 1px solid #333; }
-        th, td { border: 1px solid #333; padding: 10px; font-size: 13px; }
-        th { background-color: #fdebd0; }
-        .day-label { background-color: #fdebd0; font-weight: bold; width: 50px; text-align: center; }
+        /* 상단 로고 및 제목 영역 */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #d35400; /* 오렌지색 포인트 라인 */
+            padding-bottom: 10px;
+        }
 
-        /* 입력 폼 */
-        input, textarea { width: 100%; border: none; font-size: 14px; font-family: inherit; outline: none; background: transparent; padding: 2px; }
-        textarea { resize: none; overflow: hidden; }
+        .logo-area {
+            color: #d35400;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
 
-        /* 관리 버튼 */
-        .controls { text-align: center; margin-top: 10px; }
-        .btn { padding: 8px 15px; cursor: pointer; background: #fff; border: 1px solid #d35400; color: #d35400; border-radius: 4px; font-size: 12px; }
-        .btn-print { background: #d35400; color: #fff; font-weight: bold; width: 100%; padding: 15px; margin-top: 20px; font-size: 16px; }
+        .main-title {
+            font-size: 40px;
+            font-weight: bold;
+            letter-spacing: 20px;
+            text-decoration: underline;
+            margin-left: 50px;
+        }
 
-        /* 인쇄 시 모바일 UI 및 버튼 숨기기 */
+        .company-info {
+            text-align: right;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* 기본 정보 테이블 */
+        .top-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            background: #fff;
+        }
+
+        .top-table td {
+            border: 2px solid #5d4037; /* 진한 브라운 테두리 */
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .label {
+            background-color: #fbe9e7;
+            font-weight: bold;
+            width: 100px;
+            text-align: center;
+        }
+
+        /* 메인 2단 구성 */
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+
+        .schedule-section { flex: 1.5; }
+        .detail-section { flex: 1; }
+
+        h3 {
+            background-color: #d35400;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            margin: 0 0 10px 0;
+            font-size: 18px;
+        }
+
+        table.main-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        table.main-table th, table.main-table td {
+            border: 2px solid #5d4037;
+            padding: 10px;
+            font-size: 13px;
+        }
+
+        table.main-table th {
+            background-color: #fbe9e7;
+        }
+
+        .day-cell {
+            background-color: #fbe9e7;
+            font-weight: bold;
+            width: 60px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 13px;
+            resize: none;
+            height: 100px;
+        }
+
+        input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        /* 모바일 대응 및 인쇄 컨트롤 */
+        .no-print {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #d35400;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         @media print {
-            body { background: #fff; }
-            .container { width: 277mm; margin: 0; padding: 10mm; }
-            .main-content { flex-direction: row !important; } /* 무조건 가로 2단으로 출력 */
-            .left-col { flex: 1.3; }
-            .right-col { flex: 1; }
-            .controls, .btn-print { display: none; }
+            .no-print { display: none; }
+            body { background-color: #fff; }
+            .paper { box-shadow: none; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="paper">
     <header>
-        <div class="logo">Before<br>Sunset</div>
-        <div class="title">견 적 서</div>
+        <div class="logo-area">BEFORE<br>SUNSET</div>
+        <div class="main-title">견 적 서</div>
+        <div class="company-info">
+            비포썬셋 투어<br>
+            사업자번호: 123-45-67890<br>
+            연락처: 010-1234-5678
+        </div>
     </header>
 
-    <table class="info-table">
+    <table class="top-table">
         <tr>
-            <td class="info-label">요청일자</td><td><input type="text" value="26. 03. 30"></td>
-            <td class="info-label">예약지점</td><td><input type="text" value="비포썬셋 4호점"></td>
+            <td class="label">요청일자</td><td><input type="text" value="2026. 03. 30"></td>
+            <td class="label">예약지점</td><td><input type="text" value="비포썬셋 4호점"></td>
         </tr>
         <tr>
-            <td class="info-label">예약자명</td><td><input type="text" value="장세환 4인팀"></td>
-            <td class="info-label">입실일자</td><td><input type="text" value="26. 06. 18"></td>
+            <td class="label">예약자명</td><td><input type="text" value="장세환 4인팀"></td>
+            <td class="label">입실일자</td><td><input type="text" value="2026. 06. 18"></td>
+        </tr>
+        <tr>
+            <td class="label">총 금액</td><td><input type="text" value="₩ 2,992,000"></td>
+            <td class="label">퇴실일자</td><td><input type="text" value="2026. 06. 21"></td>
         </tr>
     </table>
 
-    <div class="main-content">
-        <div class="left-col">
+    <div class="content-wrapper">
+        <div class="schedule-section">
             <h3>주 요 일 정</h3>
-            <table id="scheduleTable">
+            <table class="main-table" id="schTable">
                 <tr>
-                    <td class="day-label">1일차</td>
-                    <td><textarea rows="3">공항 도착 및 풀빌라 체크인</textarea></td>
-                    <td class="controls" width="40"><button class="btn" onclick="this.parentElement.parentElement.remove()">X</button></td>
+                    <td class="day-cell">1일차</td>
+                    <td><textarea>한국 출발 / 비엔티안 공항 도착&#10;풀빌라 체크인 및 휴식</textarea></td>
+                </tr>
+                <tr>
+                    <td class="day-cell">2일차</td>
+                    <td><textarea>롱비엔CC 18홀 라운딩&#10;자유시간 및 마사지 서비스</textarea></td>
                 </tr>
             </table>
-            <div class="controls">
-                <button class="btn" onclick="addSchedule()">+ 일정 추가</button>
+            <div class="no-print" style="position:static; margin-top:5px;">
+                <button class="btn" style="background:#666; padding:5px 10px;" onclick="addSch()">+ 일정추가</button>
             </div>
         </div>
 
-        <div class="right-col">
+        <div class="detail-section">
             <h3>세 부 내 역</h3>
-            <table>
-                <tr><th width="30%">항목</th><th>내용</th></tr>
-                <tr><td class="info-label">숙박</td><td><input type="text" value="프라이빗 풀빌라 3박"></td></tr>
-                <tr><td class="info-label">골프</td><td><input type="text" value="18홀 3회 포함"></td></tr>
+            <table class="main-table">
+                <thead>
+                    <tr><th>항목</th><th>내용</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td class="label">숙박</td><td><input type="text" value="프라이빗 풀빌라"></td></tr>
+                    <tr><td class="label">포함</td><td><input type="text" value="전일정 차량/가이드"></td></tr>
+                    <tr><td class="label">특전</td><td><input type="text" value="마사지 90분 제공"></td></tr>
+                </tbody>
             </table>
-            <div style="margin-top:15px;">
-                <p style="font-size:12px; font-weight:bold;">◆ 특이사항</p>
-                <textarea style="border: 1px solid #ccc; min-height: 80px;">내용을 입력하세요...</textarea>
+            
+            <div style="margin-top:20px;">
+                <h4 style="margin-bottom:5px; color:#d35400;">◆ 특이사항</h4>
+                <textarea style="border: 2px solid #5d4037; background: #fff; padding: 10px; height: 120px;">- 예약금 입금 후 확정&#10;- 환불 규정은 약관에 따름</textarea>
             </div>
         </div>
     </div>
+</div>
 
-    <button class="btn-print" onclick="window.print()">PDF 저장 및 인쇄하기</button>
+<div class="no-print">
+    <button class="btn" onclick="window.print()">PDF 저장 / 인쇄</button>
 </div>
 
 <script>
-    function addSchedule() {
-        const table = document.getElementById('scheduleTable');
-        const rowCount = table.rows.length + 1;
+    function addSch() {
+        const table = document.getElementById('schTable');
+        const count = table.rows.length + 1;
         const row = table.insertRow(-1);
-        row.innerHTML = `
-            <td class="day-label">${rowCount}일차</td>
-            <td><textarea rows="3"></textarea></td>
-            <td class="controls"><button class="btn" onclick="this.parentElement.parentElement.remove()">X</button></td>
-        `;
+        row.innerHTML = `<td class="day-cell">${count}일차</td><td><textarea></textarea></td>`;
     }
 </script>
 
