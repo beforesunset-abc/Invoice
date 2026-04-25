@@ -3,160 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Before Sunset 견적서</title>
+    <title>Before Sunset 자동 견적기</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root { --line-color: #444; --bg-light: #f9f9f9; --accent-red: #e74c3c; }
-        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background: #eee; padding: 10px; margin: 0; color: #333; }
+        :root { --line-color: #444; --bg-light: #f9f9f9; --accent-orange: #d35400; }
+        body { font-family: 'Pretendard', sans-serif; background: #eee; margin: 0; padding: 10px; }
         
-        .paper { width: 210mm; min-height: 297mm; padding: 15mm; margin: 10px auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); box-sizing: border-box; position: relative; }
+        /* 설정 및 입력 영역 */
+        .controls { max-width: 850px; margin: 10px auto; background: #333; color: white; padding: 20px; border-radius: 8px; }
+        .input-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .input-group div { display: flex; flex-direction: column; }
+        .input-group label { font-size: 12px; margin-bottom: 4px; color: #ccc; }
+        .input-group input { padding: 8px; border-radius: 4px; border: none; }
         
-        /* 헤더 부분 */
-        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
-        .logo { color: #d35400; font-weight: bold; line-height: 1.2; }
-        .logo .sun { font-size: 24px; }
-        .title { font-size: 32px; font-weight: bold; text-decoration: underline; text-underline-offset: 8px; margin-top: 10px; }
-        
-        /* 상단 요약 테이블 */
-        .summary-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-        .summary-table td { border: 1px solid var(--line-color); padding: 8px; font-size: 14px; text-align: center; }
-        .label-cell { background: var(--bg-light); font-weight: bold; width: 15%; }
-        .value-cell { width: 35%; }
+        button { width: 100%; padding: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; background: var(--accent-orange); color: white; }
 
-        /* 메인 컨텐츠 영역 (2단 구성) */
+        /* 견적서 종이 디자인 */
+        .paper { width: 210mm; min-height: 297mm; padding: 15mm; margin: 0 auto; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1); box-sizing: border-box; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .logo { color: var(--accent-orange); font-weight: bold; font-size: 20px; }
+        .title { font-size: 32px; font-weight: bold; text-decoration: underline; text-underline-offset: 8px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; }
+        th, td { border: 1px solid var(--line-color); padding: 8px; }
+        th { background: #ffe6cc; text-align: center; }
+        .label-cell { background: var(--bg-light); font-weight: bold; width: 15%; text-align: center; }
+        
         .main-content { display: flex; gap: 20px; }
-        .left-col { flex: 1.2; }
-        .right-col { flex: 1; }
+        .left-col, .right-col { flex: 1; }
+        .section-title { text-align: center; font-weight: bold; margin: 10px 0; font-size: 16px; background: #f4f4f4; padding: 5px; border: 1px solid #444; }
 
-        .section-title { text-align: center; font-weight: bold; margin-bottom: 10px; font-size: 18px; }
+        /* 계산 결과 강조 */
+        .total-highlight { color: #d35400; font-weight: bold; }
 
-        /* 표 공통 스타일 */
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; }
-        th, td { border: 1px solid var(--line-color); padding: 6px; }
-        th { background: #ffe6cc; font-weight: bold; }
-
-        /* 일정표 스타일 */
-        .schedule-table td:first-child { background: #ffe6cc; font-weight: bold; width: 50px; text-align: center; }
-        .schedule-table ul { margin: 0; padding-left: 15px; text-align: left; list-style-type: none; }
-        .schedule-table li::before { content: "• "; color: #d35400; }
-
-        /* 상세내역 스타일 */
-        .detail-table td { text-align: center; }
-        .detail-table .include-cell { font-size: 12px; text-align: left; padding-left: 10px; }
-
-        /* 하단 안내사항 */
-        .notices { font-size: 11px; margin-top: 15px; line-height: 1.6; }
-        .red-text { color: var(--accent-red); font-weight: bold; }
-
-        /* 취소 규정 표 */
-        .cancel-table { text-align: center; margin-top: 10px; }
-        .cancel-table th { font-size: 11px; }
-
-        /* 버튼 */
-        .btn-box { text-align: center; margin: 20px 0; }
-        button { padding: 10px 25px; font-size: 16px; background: #333; color: white; border: none; cursor: pointer; border-radius: 5px; }
-
-        @media (max-width: 800px) {
-            .paper { width: 100%; height: auto; padding: 5mm; }
-            .main-content { flex-direction: column; }
+        @media print {
+            .controls { display: none !important; }
+            .paper { box-shadow: none; margin: 0; width: 100%; }
+            body { background: white; padding: 0; }
         }
     </style>
 </head>
 <body>
 
-<div class="btn-box">
-    <button onclick="savePDF()">PDF 저장하기</button>
+<div class="controls">
+    <div class="input-group">
+        <div><label>예약자명</label><input type="text" id="in_name" value="장세환 4인팀" oninput="update()"></div>
+        <div><label>요청일자</label><input type="text" id="in_reqDate" value="2026.03.30" oninput="update()"></div>
+        <div><label>입실날짜</label><input type="text" id="in_checkIn" value="2026.06.18" oninput="update()"></div>
+        <div><label>퇴실날짜</label><input type="text" id="in_checkOut" value="2026.06.21" oninput="update()"></div>
+    </div>
+    <div class="input-group">
+        <div><label>적용 환율(1$당 원화)</label><input type="number" id="in_rate" value="1350" oninput="update()"></div>
+        <div><label>인원수</label><input type="number" id="in_count" value="4" oninput="update()"></div>
+        <div><label>예약지점</label><input type="text" id="in_branch" value="비포썬셋 4호점" oninput="update()"></div>
+    </div>
+    <hr style="border: 0.5px solid #555;">
+    <div class="input-group">
+        <div><label>숙박비 ($)</label><input type="number" id="p_room" value="1000" oninput="update()"></div>
+        <div><label>차량요금 ($)</label><input type="number" id="p_car" value="200" oninput="update()"></div>
+        <div><label>골프요금 ($)</label><input type="number" id="p_golf" value="800" oninput="update()"></div>
+        <div><label>야간투어 ($)</label><input type="number" id="p_tour" value="150" oninput="update()"></div>
+    </div>
+    <button onclick="savePDF()">PDF 견적서 다운로드</button>
 </div>
 
 <div class="paper" id="invoice">
     <div class="header">
-        <div class="logo">
-            <span class="sun">Before</span><br>Sunset
-        </div>
+        <div class="logo">Before<br>Sunset</div>
         <div class="title">견 적 서</div>
-        <div style="width: 80px;"></div> </div>
+        <div style="width:60px;"></div>
+    </div>
 
-    <table class="summary-table">
+    <table>
         <tr>
-            <td class="label-cell">요청일자</td><td class="value-cell">26. 03. 30</td>
-            <td class="label-cell">예약지점</td><td class="value-cell">비포썬셋 4호점 기준</td>
+            <td class="label-cell">요청일자</td><td id="out_reqDate"></td>
+            <td class="label-cell">예약지점</td><td id="out_branch"></td>
         </tr>
         <tr>
-            <td class="label-cell">예약자명</td><td class="value-cell">장세환 4인팀</td>
-            <td class="label-cell">입실일자</td><td class="value-cell">26. 06. 18</td>
+            <td class="label-cell">예약자명</td><td id="out_name"></td>
+            <td class="label-cell">입실일자</td><td id="out_checkIn"></td>
         </tr>
         <tr>
-            <td class="label-cell">총금액</td><td class="value-cell">₩2,992,000</td>
-            <td class="label-cell">퇴실일자</td><td class="value-cell">26. 06. 21</td>
+            <td class="label-cell">총 금액</td>
+            <td class="total-highlight"><span id="total_usd"></span> / <span id="total_krw"></span></td>
+            <td class="label-cell">퇴실일자</td><td id="out_checkOut"></td>
         </tr>
         <tr>
-            <td class="label-cell">1인 요금</td><td class="value-cell">₩748,000</td>
-            <td class="label-cell">문의</td><td class="value-cell">010-4372-3287(담당자)</td>
+            <td class="label-cell">1인 요금</td>
+            <td><span id="per_usd"></span> / <span id="per_krw"></span></td>
+            <td class="label-cell">문의</td><td>010-4372-3287</td>
         </tr>
     </table>
 
     <div class="main-content">
         <div class="left-col">
             <div class="section-title">주요 일정</div>
-            <table class="schedule-table">
-                <tr><td>1일차</td><td><ul><li>한국 출발</li><li>비엔티안 공항 도착</li><li>풀빌라 체크인</li><li>야간투어</li></ul></td></tr>
-                <tr><td>2일차</td><td><ul><li>롱비엔cc 18홀 4인 티업</li><li>자유일정</li><li>라오스 전통마사지 60분 <span style="color:blue">[서비스]</span></li></ul></td></tr>
-                <tr><td>3일차</td><td><ul><li>레이크뷰 18홀 4인 티업</li><li>자유일정</li><li>라오스 전통마사지 60분 <span style="color:blue">[서비스]</span></li></ul></td></tr>
-                <tr><td>4일차</td><td><ul><li>롱비엔cc 18홀 4인 티업</li><li>비엔티안 야시장 투어</li><li>공항 이동</li></ul></td></tr>
-                <tr><td>5일차</td><td><ul><li>한국 도착 및 귀가</li></ul></td></tr>
+            <table style="text-align:center;">
+                <tr><th style="width:20%;">날짜</th><th>내용 (수정가능)</th></tr>
+                <tr><td>1일차</td><td contenteditable="true">비엔티안 공항 도착 및 풀빌라 체크인</td></tr>
+                <tr><td>2일차</td><td contenteditable="true">골프 라운딩 및 자유 일정</td></tr>
+                <tr><td>3일차</td><td contenteditable="true">골프 라운딩 및 야간 투어</td></tr>
+                <tr><td>4일차</td><td contenteditable="true">공항 샌딩 및 출국</td></tr>
             </table>
-            <div style="color:red; font-size:10px; text-align:center;">※ 상기 일정 및 순서는 현지 사정에 의해 변동 될 수 있습니다</div>
         </div>
-
         <div class="right-col">
-            <div class="section-title">세부 내역</div>
-            <table class="detail-table">
-                <thead><tr><th>항목</th><th>내역</th></tr></thead>
-                <tr><td>숙박</td><td>프라이빗 풀빌라 3박</td></tr>
-                <tr>
-                    <td>포함 서비스</td>
-                    <td class="include-cell">
-                        • 골프: 18홀 3회<br>
-                        • 전 일정 프라이빗 밴<br>
-                        • 얼리버드 특전: 마사지 3회<br>
-                        • 매일 맥주 1박스 제공
-                    </td>
+            <div class="section-title">상세 요금 내역 (USD)</div>
+            <table>
+                <tr><th>항목</th><th>금액</th></tr>
+                <tr><td>숙박비</td><td id="d_room" style="text-align:right;"></td></tr>
+                <tr><td>차량요금</td><td id="d_car" style="text-align:right;"></td></tr>
+                <tr><td>골프요금</td><td id="d_golf" style="text-align:right;"></td></tr>
+                <tr><td>야간투어</td><td id="d_tour" style="text-align:right;"></td></tr>
+                <tr style="background:var(--bg-light); font-weight:bold;">
+                    <td>합계 ($)</td><td id="d_total" style="text-align:right;"></td>
                 </tr>
-                <tr><td>기타</td><td>항공권, 캐디팁 등 불포함</td></tr>
-                <tr style="background:#f4f4f4; font-weight:bold;"><td>총 금액</td><td>₩4,440,000</td></tr>
             </table>
-
-            <div class="notices">
-                ◆ 특이 사항<br>
-                - <span class="red-text">예약금을 제외한 잔금은 입실 30일 이전 입금</span><br>
-                - 입금계좌 : 카카오뱅크 3333 23 0577923(김기배)<br>
-                <div style="text-align:center; margin-top:10px;">
-                    2026. 03. 30<br>
-                    <strong>비포썬셋(Before Sunset Pool Villa)</strong>
-                </div>
+            <div style="font-size:11px; line-height:1.6;">
+                * 적용환율: 1$ = <span id="out_rate"></span>원 기준<br>
+                * 입금계좌: 카카오뱅크 3333 23 0577923 (김기배)
             </div>
         </div>
     </div>
 
-    <div style="margin-top:20px; font-weight:bold; font-size:13px;">* 취소 환불 규정 *</div>
-    <table class="cancel-table">
-        <tr><th>45일 이후</th><th>42일까지(35~42)</th><th>35일까지(29~35)</th><th>28일까지(22~28)</th><th>21일까지(당일~21)</th></tr>
-        <tr><td>전액 환불</td><td>80% 환불</td><td>60% 환불</td><td>40% 환불</td><td>환불 불가</td></tr>
-    </table>
+    <div style="text-align:center; margin-top:50px; font-weight:bold;">
+        <span id="out_today"></span><br><br>
+        비포썬셋 (Before Sunset Pool Villa)
+    </div>
 </div>
 
 <script>
+    function update() {
+        // 입력값 가져오기
+        const name = document.getElementById('in_name').value;
+        const reqDate = document.getElementById('in_reqDate').value;
+        const checkIn = document.getElementById('in_checkIn').value;
+        const checkOut = document.getElementById('in_checkOut').value;
+        const branch = document.getElementById('in_branch').value;
+        const rate = parseFloat(document.getElementById('in_rate').value) || 0;
+        const count = parseFloat(document.getElementById('in_count').value) || 1;
+
+        const pRoom = parseFloat(document.getElementById('p_room').value) || 0;
+        const pCar = parseFloat(document.getElementById('p_car').value) || 0;
+        const pGolf = parseFloat(document.getElementById('p_golf').value) || 0;
+        const pTour = parseFloat(document.getElementById('p_tour').value) || 0;
+
+        // 계산
+        const totalUSD = pRoom + pCar + pGolf + pTour;
+        const totalKRW = totalUSD * rate;
+        const perUSD = totalUSD / count;
+        const perKRW = totalKRW / count;
+
+        // 화면 반영
+        document.getElementById('out_name').innerText = name;
+        document.getElementById('out_reqDate').innerText = reqDate;
+        document.getElementById('out_checkIn').innerText = checkIn;
+        document.getElementById('out_checkOut').innerText = checkOut;
+        document.getElementById('out_branch').innerText = branch;
+        document.getElementById('out_rate').innerText = rate.toLocaleString();
+        document.getElementById('out_today').innerText = reqDate;
+
+        document.getElementById('d_room').innerText = '$ ' + pRoom.toLocaleString();
+        document.getElementById('d_car').innerText = '$ ' + pCar.toLocaleString();
+        document.getElementById('d_golf').innerText = '$ ' + pGolf.toLocaleString();
+        document.getElementById('d_tour').innerText = '$ ' + pTour.toLocaleString();
+        document.getElementById('d_total').innerText = '$ ' + totalUSD.toLocaleString();
+
+        document.getElementById('total_usd').innerText = '$ ' + totalUSD.toLocaleString();
+        document.getElementById('total_krw').innerText = '₩ ' + totalKRW.toLocaleString();
+        document.getElementById('per_usd').innerText = '$ ' + perUSD.toLocaleString();
+        document.getElementById('per_krw').innerText = '₩ ' + perKRW.toLocaleString();
+    }
+
     function savePDF() {
         const element = document.getElementById('invoice');
         const opt = {
-            margin: 0.2,
+            margin: 0.3,
             filename: 'Before_Sunset_견적서.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
         html2pdf().set(opt).from(element).save();
     }
+
+    // 초기 실행
+    update();
 </script>
 
 </body>
