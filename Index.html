@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>비포썬셋 모바일 견적서</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased; }
+        
+        /* PDF 출력용 스타일 (A4 규격 유지) */
+        #print-area { 
+            width: 210mm; 
+            min-height: 297mm; 
+            padding: 15mm; 
+            background: white; 
+            margin: 0 auto;
+        }
+
+        /* 모바일 화면용 스타일 */
+        @media screen and (max-width: 768px) {
+            body { padding: 10px; background-color: #f3f4f6; }
+            #print-area { 
+                width: 1000px; /* 모바일에서 레이아웃 깨짐 방지 위해 고정폭으로 렌더링 */
+                transform: scale(0.35); /* 화면에 맞게 축소 표시 */
+                transform-origin: top left;
+                margin-bottom: -600px; /* 축소로 인한 공백 제거 */
+            }
+            .mobile-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        }
+
+        .bg-orange-soft { background-color: #fdf2e9; }
+        th, td { border: 1px solid #d1d5db; padding: 8px; font-size: 14px; }
+        textarea, input { width: 100%; border: none; outline: none; background: transparent; font-size: 14px; }
+        
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="no-print sticky top-0 z-50 bg-white border-b p-4 flex gap-2 justify-center shadow-md">
+        <button onclick="savePDF()" class="bg-orange-600 text-white font-bold py-3 px-8 rounded-full shadow-lg active:scale-95 transition">
+            📄 PDF 저장 / 카톡 전송
+        </button>
+    </div>
+
+    <div class="mobile-scroll">
+        <div id="print-area">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h2 class="text-orange-700 font-bold text-2xl leading-tight">Before<br>Sunset</h2>
+                </div>
+                <h1 class="text-5xl font-bold underline tracking-[1em] ml-20">견적서</h1>
+                <div class="w-32"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6 mb-8">
+                <table class="w-full">
+                    <tr><th class="bg-orange-soft w-1/3 text-gray-700">요청일자</th><td><input type="text" placeholder="26. 03. 30"></td></tr>
+                    <tr><th class="bg-orange-soft text-gray-700">예약자명</th><td><input type="text" placeholder="홍길동 4인팀"></td></tr>
+                    <tr><th class="bg-orange-soft font-bold text-blue-600">총금액</th><td><input type="text" id="displayTotal" class="font-bold text-blue-600" readonly></td></tr>
+                    <tr><th class="bg-orange-soft text-gray-700">1인 요금</th><td><input type="number" id="pricePerPerson" oninput="calculateTotal()" placeholder="숫자만 입력"></td></tr>
+                </table>
+                <table class="w-full">
+                    <tr><th class="bg-orange-soft w-1/3 text-gray-700">예약지점</th><td><input type="text" value="비포썬셋 4호점 기준"></td></tr>
+                    <tr><th class="bg-orange-soft text-gray-700">입실일자</th><td><input type="text" placeholder="26. 06. 18"></td></tr>
+                    <tr><th class="bg-orange-soft text-gray-700">퇴실일자</th><td><input type="text" placeholder="26. 06. 21"></td></tr>
+                    <tr><th class="bg-orange-soft text-gray-700">문의</th><td><input type="text" value="010-4372-3287(담당자)"></td></tr>
+                </table>
+            </div>
+
+            <div class="flex gap-6">
+                <div class="w-[45%]">
+                    <h3 class="text-center font-bold mb-3 text-lg border-b-2 border-orange-200">주요 일정</h3>
+                    <table class="w-full h-full">
+                        <tr><th class="bg-orange-soft w-16">1일차</th><td><textarea rows="5">공항 미팅 및 숙소 체크인</textarea></td></tr>
+                        <tr><th class="bg-orange-soft">2일차</th><td><textarea rows="5">오전 골프 18홀&#10;오후 마사지 60분</textarea></td></tr>
+                        <tr><th class="bg-orange-soft">3일차</th><td><textarea rows="5">자유 시간 및 야간투어</textarea></td></tr>
+                        <tr><th class="bg-orange-soft">4일차</th><td><textarea rows="5">체크아웃 및 공항 샌딩</textarea></td></tr>
+                    </table>
+                </div>
+
+                <div class="w-[55%]">
+                    <h3 class="text-center font-bold mb-3 text-lg border-b-2 border-orange-200">세부 내역</h3>
+                    <table class="w-full">
+                        <tr class="bg-orange-soft text-center"><th class="w-24">항목</th><th>내역</th></tr>
+                        <tr><th class="bg-orange-soft">숙박</th><td><textarea rows="2">프라이빗 풀빌라 3박</textarea></td></tr>
+                        <tr>
+                            <th class="bg-orange-soft">포함 서비스</th>
+                            <td class="p-0 border-none">
+                                <table class="w-full border-none">
+                                    <tr><th class="w-24 border-l-0 border-t-0 font-normal">골프</th><td class="border-t-0 border-r-0"><input type="text" value="18홀 3회"></td></tr>
+                                    <tr><th class="border-l-0 font-normal">특전</th><td class="border-r-0"><input type="text" value="전신 마사지 60분" class="text-blue-600 font-bold"></td></tr>
+                                    <tr><th class="border-l-0 border-b-0 font-normal">기타</th><td class="border-b-0 border-r-0"><input type="text" value="매일 맥주 1박스"></td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr><th class="bg-orange-soft">불포함</th><td><textarea>항공권, 개인 경비, 캐디팁</textarea></td></tr>
+                        <tr class="bg-orange-soft">
+                            <th class="font-bold">총 금액</th>
+                            <td class="text-right font-bold py-6 px-4 text-2xl" id="finalTotalDisplay">₩ 0</td>
+                        </tr>
+                    </table>
+
+                    <div class="mt-6 text-sm">
+                        <p class="font-bold text-orange-800">◆ 안내 사항</p>
+                        <textarea rows="3" class="text-red-600 font-bold">- 예약금 입금 시 예약이 확정됩니다.&#10;- 잔금은 입실 30일 전까지 입금 부탁드립니다.</textarea>
+                        <div class="text-right mt-4 font-bold text-gray-700">
+                            <p>계좌: 카카오뱅크 3333-23-0577923 (김기배)</p>
+                            <p class="mt-4 text-xl">비포썬셋(Before Sunset)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 border-t pt-4">
+                <p class="text-center font-bold text-xs mb-2">* 취소 환불 규정 *</p>
+                <table class="w-full text-center text-[11px] bg-gray-50">
+                    <tr><th class="py-1">43일전</th><th>42~35일전</th><th>34~28일전</th><th>27~21일전</th><th>20일전~당일</th></tr>
+                    <tr><td class="py-2">100% 환불</td><td>80% 환불</td><td>60% 환불</td><td>40% 환불</td><td class="text-red-600">환불 불가</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 금액 자동 계산 (4인 기준)
+        function calculateTotal() {
+            const price = document.getElementById('pricePerPerson').value;
+            const total = price * 4;
+            const formatted = '₩ ' + Number(total).toLocaleString();
+            document.getElementById('displayTotal').value = formatted;
+            document.getElementById('finalTotalDisplay').innerText = formatted;
+        }
+
+        // 안드로이드 모바일 저장 최적화 함수
+        function savePDF() {
+            const element = document.getElementById('print-area');
+            const guestName = document.querySelector('input[placeholder="홍길동 4인팀"]').value || '고객';
+            
+            const opt = {
+                margin: 0,
+                filename: `비포썬셋_견적서_${guestName}.pdf`,
+                image: { type: 'jpeg', quality: 1.0 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true, 
+                    logging: false,
+                    letterRendering: true
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // 저장 시작 시 버튼 텍스트 변경 (사용자 피드백)
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ 생성 중...";
+            btn.disabled = true;
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
